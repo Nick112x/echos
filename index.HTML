@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>·</title>
+<style>
+  :root{--bg:#050508;--ink:#eef0f7}
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);
+    font-family:system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    overflow:hidden;cursor:crosshair}
+  #c{position:fixed;inset:0;display:block}
+  h1{position:fixed;inset:0;display:flex;align-items:center;
+    justify-content:center;margin:0;font-size:clamp(28px,5.4vw,72px);
+    font-weight:600;letter-spacing:-.03em;line-height:1.08;text-align:center;
+    pointer-events:none;user-select:none;padding:0 8vw;max-width:none}
+  h1 span{display:block;max-width:18ch;margin:0 auto;
+    transition:opacity .7s ease, transform .7s ease;
+    will-change:opacity, transform}
+  h1 span.fade{opacity:0;transform:translateY(6px)}
+  h1 cite{display:block;margin-top:clamp(14px,2.4vw,24px);
+    font-style:normal;font-size:clamp(10px,1.2vw,12px);
+    letter-spacing:.32em;text-transform:uppercase;color:#6a6e7c;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-weight:400}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<h1><span id="quote"><span id="qtext">I break things to understand them.</span><cite id="qauthor"></cite></span></h1>
+<script>
+const QUOTES = [
+  "We're not the same kind of men, you and me.",
+  "Everyone's a whore, Grace. We just sell different parts of ourselves.",
+  "I don't know what I am. But I know what I'm not.",
+  "I can charm the birds from the trees, but I can't get the trees to come to me.",
+  "Sometimes, we don't know what we want until we see it in another person's eyes.",
+  "I do this because I can. Because I'm good at it.",
+  "You can change what you do, but you can't change what you want.",
+  "There is no rest for me in this world. Perhaps in the next.",
+  "Everyone wants a piece of me. No one wants to pay.",
+  "You cross me, you don't get a warning. You get a consequence.",
+  "I'm not a traitor. I'm a businessman.",
+  "The only thing that matters is family. Everything else is just noise.",
+  "I'm not afraid of dying. I'm afraid of not living.",
+  "There's no such thing as a clean fight.",
+  "I have a plan, and the plan is: don't trust anyone.",
+  "If you're going to do something, do it properly. Or don't do it at all.",
+  "The world is full of people who want to be somebody. I am somebody.",
+  "You can't trust anyone in this world. Not even yourself sometimes.",
+  "I've done worse things than you could imagine, and I'll do more before I'm through.",
+  "Peace is only ever temporary.",
+  "The only way to be sure of something is to make it happen yourself.",
+  "Ambition is a dangerous thing. It gets people killed.",
+  "I am not a good man. But I am a loyal one.",
+  "There are no rules in this world. Only winners and losers.",
+  "If you want something done right, do it yourself. If you want it done properly, do it twice.",
+  "Hope is a dangerous thing. It can drive a man insane.",
+  "I've always been a man of my word. Even when my word was a lie.",
+  "The only thing we can control is how we respond.",
+  "I don't want to be a good man. I want to be a successful one.",
+  "They say the darkest hour is just before dawn. I say the darkest hour is just before the kill.",
+  "Fear is a weapon. Use it wisely.",
+  "You don't get to choose your family. But you get to choose what you do for them.",
+  "The past is a ghost. It can't hurt you unless you let it.",
+  "There's no shame in losing. Only in giving up.",
+  "A man who doesn't fight for what he wants doesn't deserve to have it.",
+  "I'm a man of my word. But my word changes with the wind.",
+  "The only way to win is to be willing to lose everything.",
+  "You can't build an empire on trust. You build it on fear.",
+  "I have no enemies. Only people who haven't yet realized they're on my side.",
+  "The only thing I regret is not doing it sooner.",
+  "Every man has a price. The trick is finding it.",
+  "There's no such thing as a fair fight. Only a fight you win.",
+  "I've been called many things. Most of them true.",
+  "The world doesn't owe you anything. You have to take it.",
+  "If you're not willing to die for something, you don't deserve to live for it.",
+  "The only thing that's certain is that nothing is certain.",
+  "Power isn't given. It's taken.",
+  "I have no time for regrets. I have a future to build.",
+  "The strongest men aren't the ones who never fall. They're the ones who always get back up.",
+  "I'm not a hero. I'm a survivor.",
+  "Loyalty is a two-way street. If you're not loyal to me, I'm not loyal to you.",
+  "The world is a cruel place. And I'm just trying to survive it.",
+  "There's no honour among thieves. But there is among family.",
+  "I don't trust anyone. Not even myself.",
+  "A man without a plan is a man without a future.",
+  "You can't change the past. But you can make the future.",
+  "I'm not a saint. But I'm not a sinner either.",
+  "The only thing I know for sure is that I know nothing.",
+  "Life is a game. And I intend to win.",
+  "You can either be a victim or a victor. I choose victor.",
+  "The world is full of opportunities. You just have to be willing to take them.",
+  "I'm not afraid of the dark. I'm afraid of what's in it.",
+  "The only way to get ahead is to be willing to step on a few toes.",
+  "I've made mistakes. But I've never made the same one twice.",
+  "If you want something, you have to take it. Nobody's going to give it to you.",
+  "The only thing that separates us from the animals is our ability to rationalize.",
+  "I am what I am. And I make no apologies for it.",
+  "You can't build a legacy on good intentions alone.",
+  "The only thing I fear is fear itself.",
+  "There's no such thing as a second chance. Only the illusion of one.",
+  "I've spent my whole life fighting. I don't know how to do anything else.",
+  "The only way to be truly free is to have nothing to lose.",
+  "I'm not a man who forgives. I'm a man who remembers.",
+  "The world doesn't care about your feelings. It only cares about results.",
+  "I've learned that the only person you can truly rely on is yourself.",
+  "The only thing worse than being betrayed is being betrayed by someone you trusted.",
+  "I'm not a good man, but I'm a better man than most.",
+  "You don't get to choose your destiny. You get to choose how you meet it.",
+  "The only way to get respect is to earn it.",
+  "I've seen things that would make most men weep. I just keep going.",
+  "There's no such thing as a perfect plan. Only a plan that works.",
+  "I'm not a patient man. But I'm a determined one.",
+  "The only thing that matters in the end is what you're willing to do to get what you want.",
+  "I'm not a fool. I'm just not afraid to look like one.",
+  "The only thing I've ever wanted is to be remembered.",
+  "You can't build an empire on dreams alone. You need blood, sweat, and tears.",
+  "I've always believed that if you want something badly enough, you'll find a way to get it.",
+  "The only thing that stands between you and success is your own fear.",
+  "I'm not a man who gives up. I'm a man who gets even.",
+  "There's no shame in being afraid. Only in letting fear control you.",
+  "The only thing that matters is the legacy you leave behind.",
+  "I've learned that the only way to truly win is to be willing to lose everything.",
+  "You can't change the world by playing by the rules. You have to break them.",
+  "I'm not a man who looks back. I look forward.",
+  "The only thing that's certain in this world is that nothing lasts forever.",
+  "I've always known that the only way to get what you want is to take it.",
+  "The only thing I've ever been afraid of is being forgotten.",
+  "I'm not a man who forgives easily. But I'm a man who remembers everything.",
+  "The only way to be truly free is to be willing to die for something.",
+  "There's no such thing as a fair fight. There's only the fight you win.",
+  "I've learned that the only person you can trust is yourself.",
+  "The only thing that matters in the end is what you're willing to sacrifice.",
+  "I'm not a man who follows the rules. I'm a man who makes them.",
+  "The only thing I've ever wanted is to be remembered. And I will be.",
+  "I'm not a hero. I'm just a man who does what needs to be done.",
+  "The only way to get what you want is to be willing to do what others won't.",
+  "I've always believed that the only way to win is to be willing to lose everything.",
+  "The only thing that matters is the here and now. The future is just a dream.",
+  "I'm not a man who lives in the past. I live in the present.",
+  "The only thing I've ever truly feared is being forgotten.",
+  "I've learned that the only way to truly be free is to be willing to lose everything.",
+  "The only thing that matters is what you're willing to do to get what you want.",
+  "I'm not a man who forgives. I'm a man who gets even.",
+  "The only thing that matters in the end is the legacy you leave behind.",
+  "I've always known that the only way to truly win is to be willing to lose everything."
+];
+
+const qtext = document.getElementById('qtext');
+const qauthor = document.getElementById('qauthor');
+const quoteWrap = document.getElementById('quote');
+
+let qIndex = Math.floor(Math.random() * QUOTES.length);
+qtext.textContent = QUOTES[qIndex];
+
+function cycleQuote() {
+  quoteWrap.classList.add('fade');
+  setTimeout(() => {
+    qIndex = (qIndex + 1) % QUOTES.length;
+    qtext.textContent = QUOTES[qIndex];
+    quoteWrap.classList.remove('fade');
+  }, 720);
+}
+
+// rotate every 7 seconds so the page feels alive on its own
+setInterval(cycleQuote, 7000);
+
+// clicking also advances the quote
+addEventListener('pointerdown', cycleQuote);
+
+/* ---------- particle field ---------- */
+const c = document.getElementById('c'), ctx = c.getContext('2d');
+let W, H, DPR = Math.min(devicePixelRatio || 1, 2);
+function resize() {
+  W = innerWidth; H = innerHeight;
+  c.width = W * DPR; c.height = H * DPR;
+  c.style.width = W + 'px'; c.style.height = H + 'px';
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+}
+addEventListener('resize', resize); resize();
+
+let mx = W / 2, my = H / 2, tmx = mx, tmy = my;
+const N = 260;
+const parts = [];
+for (let i = 0; i < N; i++) {
+  const a = Math.random() * Math.PI * 2;
+  const r = 40 + Math.random() * Math.max(W, H) * 0.6;
+  parts.push({
+    a, baseR: r,
+    ox: Math.cos(a) * r, oy: Math.sin(a) * r,
+    x: 0, y: 0, vx: 0, vy: 0,
+    size: 0.4 + Math.random() * 1.4,
+    speed: 0.0006 + Math.random() * 0.0014,
+  });
+}
+
+addEventListener('mousemove', e => { tmx = e.clientX; tmy = e.clientY; });
+addEventListener('touchmove', e => {
+  if (e.touches[0]) { tmx = e.touches[0].clientX; tmy = e.touches[0].clientY; }
+}, { passive: true });
+
+function loop(t) {
+  mx += (tmx - mx) * 0.06;
+  my += (tmy - my) * 0.06;
+
+  ctx.fillStyle = 'rgba(5,5,8,0.30)';
+  ctx.fillRect(0, 0, W, H);
+
+  const cx = W / 2, cy = H / 2;
+
+  for (const p of parts) {
+    p.a += p.speed;
+    const bx = cx + Math.cos(p.a) * p.baseR;
+    const by = cy + Math.sin(p.a) * p.baseR * 0.78;
+
+    const dx = mx - bx, dy = my - by;
+    const dm = Math.hypot(dx, dy) || 1;
+    const strength = Math.max(0, 1 - dm / 360);
+    const gx = (dx / dm) * strength * 28;
+    const gy = (dy / dm) * strength * 28;
+
+    const tx = bx + gx;
+    const ty = by + gy;
+
+    p.vx += (tx - p.x) * 0.06;
+    p.vy += (ty - p.y) * 0.06;
+    p.vx *= 0.9; p.vy *= 0.9;
+    p.x += p.vx; p.y += p.vy;
+
+    const alpha = 0.25 + strength * 0.6;
+    ctx.fillStyle = 'rgba(238,240,247,' + alpha + ')';
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size + strength * 1.2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  const g = ctx.createRadialGradient(mx, my, 0, mx, my, 220);
+  g.addColorStop(0, 'rgba(138,107,255,0.08)');
+  g.addColorStop(1, 'rgba(138,107,255,0)');
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.arc(mx, my, 220, 0, Math.PI * 2); ctx.fill();
+
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
